@@ -25,13 +25,38 @@
      {:name "left-thigh" :size 4}
      {:name "left-lower-leg" :size 3}
      {:name "left-achilles" :size 1}
-     {:name "left-foot" :size 2}
-     ])
+     {:name "left-foot" :size 2}])
 
 
-(defn matching-part [part]
-  {:name (clojure.string/replace (:name part) #"^left-" "rigth-")
-   :size (:size part)})
+(defn matching-part
+
+  ([part n]
+    (let [part-name (:name part)
+          part-size (:size part)
+          resulting [(when (not= (rem mod n) 0)
+                       (clojure.string/replace part-name
+                                               #"^left-"
+                                              (str "central"
+                                                   (when (> counter 0) counter) "-"))]
+            modn (mod (if (not= (rem mod n) (dec n) n)) 2)]
+        (loop [counter 0
+               resulting resulting]
+          (if (> counter modn)
+            resulting
+            (recur (inc counter)
+                   (into resulting
+                           [{:name (clojure.string/replace part-name
+                                                           #"^left-"
+                                                           (str "left"
+                                                                 (when (> counter 0) counter) "-"))
+                             :size part-size}
+                            {:name (clojure.string/replace part-name
+                                                           #"^left-"
+                                                           (str "right"
+                                                                (when (> counter 0) counter) "-"))
+                             :size part-size}]
+                  ))))))
+   )
 
  (defn symmetrize-body-parts
    "Expects a seq of maps that have a :name and :size"

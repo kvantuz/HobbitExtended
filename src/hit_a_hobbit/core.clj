@@ -29,19 +29,17 @@
 
 
 (defn matching-part
-
   ([part n]
     (let [part-name (:name part)
           part-size (:size part)
-          resulting [(when (not= (rem mod n) 0)
-                       (clojure.string/replace part-name
-                                               #"^left-"
-                                              (str "central"
-                                                   (when (> counter 0) counter) "-"))]
-            modn (mod (if (not= (rem mod n) (dec n) n)) 2)]
+          resulting (if (odd? n)
+                       [{:name (clojure.string/replace part-name #"^left-" "central-")
+                         :size part-size}]
+                       [])
+            quotn (quot n 2)]
         (loop [counter 0
                resulting resulting]
-          (if (> counter modn)
+          (if (= counter quotn)
             resulting
             (recur (inc counter)
                    (into resulting
@@ -56,16 +54,17 @@
                                                                 (when (> counter 0) counter) "-"))
                              :size part-size}]
                   ))))))
+    ([part]
+      (matching-part part 2))
    )
 
  (defn symmetrize-body-parts
    "Expects a seq of maps that have a :name and :size"
    [asym-body-parts]
    (reduce (fn [final-body-parts part]
-             (into final-body-parts (set [part (matching-part part)])))
+             (into final-body-parts (set (matching-part part 5))))
            []
            asym-body-parts))
-
 
 (defn hit
   "Hit hobbit"
